@@ -18,11 +18,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,7 +53,12 @@ fun Content() {
         color = MaterialTheme.colors.background
     ) {
         LongPressDraggable(modifier = Modifier.fillMaxSize()) {
-            BonusCard(bonusCardDesign)
+            lateinit var bonusCardRect: Rect
+            BonusCard(Modifier.onGloballyPositioned {
+                it.boundsInParent().let { rect ->
+                    bonusCardRect = rect
+                }
+            }, bonusCardDesign)
             StickersRow(
                 stickersRes = listOf(
                     R.drawable.cat,
@@ -68,12 +71,14 @@ fun Content() {
                     R.drawable.tiger,
                 ),
                 onDragEnd = {
-                    bonusCardDesign.decorations.add(
-                        CardDecoration(
-                            it.dataToDrop as Int,
-                            it.getNewPosition()
+                    if (bonusCardRect.contains(it.getNewPosition())) {
+                        bonusCardDesign.decorations.add(
+                            CardDecoration(
+                                it.dataToDrop as Int,
+                                it.getNewPosition()
+                            )
                         )
-                    )
+                    }
                 }
             )
             bonusCardDesign.decorations.forEach {
@@ -115,12 +120,12 @@ fun BoxScope.StickersRow(
 }
 
 @Composable
-fun BoxScope.BonusCard(design: BonusCardDesign) {
+fun BoxScope.BonusCard(modifier: Modifier, design: BonusCardDesign) {
     Card(
         elevation = 10.dp,
         backgroundColor = design.background.value,
         shape = RoundedCornerShape(24.dp),
-        modifier = Modifier
+        modifier = modifier
             .width(250.dp)
             .height(400.dp)
             .align(Alignment.TopCenter)
