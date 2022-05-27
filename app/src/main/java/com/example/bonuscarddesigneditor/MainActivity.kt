@@ -17,10 +17,18 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.bonuscarddesigneditor.ui.*
 import com.example.bonuscarddesigneditor.ui.theme.BonusCardDesignEditorTheme
@@ -60,27 +68,21 @@ fun Content() {
                     R.drawable.tiger,
                 ),
                 onDragEnd = {
-                    Log.v(
-                        "VITOCHKA",
-                        "dragPosition:${it.dragPosition}; dragOffset:${it.dragOffset}; final:${it.dragPosition + it.dragOffset}"
-                    )
                     bonusCardDesign.decorations.add(
                         CardDecoration(
                             it.dataToDrop as Int,
-                            it.dragPosition + it.dragOffset
+                            it.getNewPosition()
                         )
                     )
                 }
             )
-            // todo: add decorations to the card
             bonusCardDesign.decorations.forEach {
                 Image(
                     painter = painterResource(id = it.drawableRes),
                     contentDescription = null,
                     modifier = Modifier
                         .wrapContentSize()
-                        // todo: it doesn't want to work
-                        //.offset(x = it.position.x.dp, y = it.position.y.dp)
+                        .offset { IntOffset(it.position.x.toInt(), it.position.y.toInt()) }
                 )
             }
         }

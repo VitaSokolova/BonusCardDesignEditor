@@ -9,7 +9,10 @@ import androidx.compose.ui.geometry.Offset
 class DragTargetInfo {
     var isDragging: Boolean by mutableStateOf(false)
     var dragPosition by mutableStateOf(Offset.Zero)
+    var initialOffset by mutableStateOf(Offset.Zero)
     var dragOffset by mutableStateOf(Offset.Zero)
     var draggableComposable by mutableStateOf<(@Composable () -> Unit)?>(null)
     var dataToDrop by mutableStateOf<Any?>(null)
+
+    fun getNewPosition(): Offset = dragPosition - initialOffset + dragOffset
 }

@@ -1,5 +1,6 @@
 package com.example.bonuscarddesigneditor.ui
 
+import android.util.Log
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -26,7 +27,7 @@ fun <T> DragTarget(
 
     Box(modifier = modifier
         .onGloballyPositioned {
-            currentPosition = it.localToWindow(Offset.Zero)
+            currentPosition = it.localToRoot(Offset.Zero)
         }
         .pointerInput(Unit) {
             // detect DragGestures After LongPress
@@ -34,6 +35,7 @@ fun <T> DragTarget(
                 onDragStart = {
                     currentState.dataToDrop = dataToDrop
                     currentState.isDragging = true
+                    currentState.initialOffset = it
                     currentState.dragPosition = currentPosition + it
                     currentState.draggableComposable = content
                 },
