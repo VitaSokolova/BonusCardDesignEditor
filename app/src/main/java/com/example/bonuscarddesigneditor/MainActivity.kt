@@ -1,7 +1,6 @@
 package com.example.bonuscarddesigneditor
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
@@ -17,15 +16,12 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.bonuscarddesigneditor.ui.*
@@ -42,17 +38,17 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
-
 @Composable
 fun Content() {
     val bonusCardDesign = remember { BonusCardDesign() }
+    val draggingItemState = remember { mutableStateOf(DragTargetInfo()) }
+
     // A surface container using the 'background' color from the theme
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-        LongPressDraggable(modifier = Modifier.fillMaxSize()) {
+        LongPressDraggable(draggingItemState = draggingItemState.value, modifier = Modifier.fillMaxSize()) {
             lateinit var bonusCardRect: Rect
             BonusCard(Modifier.onGloballyPositioned {
                 it.boundsInParent().let { rect ->
@@ -60,6 +56,7 @@ fun Content() {
                 }
             }, bonusCardDesign)
             StickersRow(
+                state = draggingItemState.value,
                 stickersRes = listOf(
                     R.drawable.cat,
                     R.drawable.otter,
@@ -96,6 +93,7 @@ fun Content() {
 
 @Composable
 fun BoxScope.StickersRow(
+    state: DragTargetInfo,
     stickersRes: List<Int>,
     onDragEnd: (dragTargetInfo: DragTargetInfo) -> Unit
 ) {
@@ -114,7 +112,7 @@ fun BoxScope.StickersRow(
     ) {
 
         items(items = stickersRes) { res ->
-            StickerItem(res, onDragEnd)
+            StickerItem(state, res, onDragEnd)
         }
     }
 }
@@ -135,7 +133,11 @@ fun BoxScope.BonusCard(modifier: Modifier, design: BonusCardDesign) {
 }
 
 @Composable
-fun StickerItem(@DrawableRes stickerRes: Int, onDragEnd: (dragTargetInfo: DragTargetInfo) -> Unit) {
+fun StickerItem(
+    state: DragTargetInfo,
+    @DrawableRes stickerRes: Int,
+    onDragEnd: (dragTargetInfo: DragTargetInfo) -> Unit
+) {
     Box(
         Modifier
             .padding(8.dp)
@@ -143,6 +145,7 @@ fun StickerItem(@DrawableRes stickerRes: Int, onDragEnd: (dragTargetInfo: DragTa
             .background(Color.White, RoundedCornerShape(16.dp))
     ) {
         DragTarget(
+            state,
             modifier = Modifier,
             dataToDrop = stickerRes,
             onDragEnd = onDragEnd,
